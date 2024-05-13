@@ -1,0 +1,19 @@
+---
+galaxy_info:
+  galaxy_tags: []
+  namespace: axnode 
+  role_name: elixir
+  author: Jeremiah.
+  description: Role to install an elixir node
+  license: license private
+  min_ansible_version: "2.4"
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+
+dependencies:
+  []
+

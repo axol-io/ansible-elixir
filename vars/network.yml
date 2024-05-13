@@ -1,0 +1,14 @@
+---
+networks:
+  testnet:
+    chain_id: testnet-2
+    minimum_gas_prices: "0.025uelix"
+    consensus_key_prefix: elixvalcons
+    account_key_prefix: elix
+    genesis_checksum: 
+    genesis_is_archive_file: false
+    grpc_web_enable: false
+    seed_nodes_list:
+      - 
+    persistent_peers:
+      - 
