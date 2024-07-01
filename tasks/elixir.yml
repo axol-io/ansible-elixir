@@ -1,0 +1,116 @@
+---
+- name: Task create elixir directory structure
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  with_items:
+    - "{{ tendermint_host_config_mount }}"
+    - "{{ tendermint_host_data_mount }}"
+    - "{{ tendermint_host_wasm_mount }}"
+    - "{{ tendermint_host_keys_mount }}"
+
+  # Option 1 - Local genesis JSON file (if genesis_file var is passed)
+- name: Task Copy elixir genesis file
+  become_user: root
+  become: true
+  copy:
+    src: "{{ genesis_file }}"
+    dest: "{{ tendermint_host_config_mount }}/genesis.json"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  register: genesis_file_cfg
+  when: genesis_file is defined and genesis_file != ""
+
+# Option 2 - Remote genesis JSON file
+- name: Task Download elixir genesis file
+  get_url:
+    url: "{{ genesis_url }}"
+    dest: "{{ tendermint_host_config_mount }}/genesis.json"
+    owner: "root"
+    group: "root"
+    checksum: "{{ genesis_checksum }}"
+    mode: "0655"
+  register: genesis_cfg
+  tags: [genesis]
+  when: genesis_url is defined and genesis_url != "" and not genesis_is_archive_file
+
+# - name: Task Pull elixir Docker Image
+#   docker_image:
+#     name: jer117/elixir:v11.0.4-1
+#     state: present
+#     force_source: no
+#     ignore_errors: true
+
+- name: Task Render elixir config
+  become_user: root
+  become: true
+  template:
+    src: tendermint/{{ item }}.j2
+    dest: "{{ tendermint_host_config_mount }}/{{ item }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  loop: "{{ tendermint_config_files }}"
+  register: cfg
+
+- name: Task Detect if config has changed
+  set_fact:
+    cfg_changed: "{{ cfg.changed | bool or genesis_cfg.changed | bool }}"
+
+- name: Task Copy helper scripts
+  become_user: root
+  become: true
+  template:
+    src: scripts/{{ item }}.sh.j2
+    dest: /usr/local/bin/{{ item }}
+    force: true
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  with_items:
+    - peers
+    - latest
+    - recover-account
+    - list-accounts
+    - elixird
+
+# Validator docker ports
+- name: Task Set validator docker ports
+  set_fact:
+    docker_tendermint_ports: "{{ validator_docker_ports }}"
+
+- name: Task Create elixir Docker Container
+  docker_container:
+    name: "{{ tendermint_docker_container_name }}"
+    image: "{{ tendermint_image }}"
+    state: started
+    memory: "{{ tendermint_docker_memory_limit }}"
+    memory_swap: "{{ tendermint_docker_memory_limit }}"
+    restart_policy: unless-stopped
+    restart: "{{ cfg_changed | bool }}"
+    networks:
+      - name: "elixir-validator-net"
+    ulimits:
+      - nofile:65535:65535
+    networks_cli_compatible: true
+    ports: "{{ validator_docker_ports }}"
+    env:
+      SERVICE_SCHEME: http
+      SERVICE_HOST: "localhost"
+    detach: true
+    volumes:
+      - "{{ tendermint_host_config_mount }}:{{ tendermint_docker_config_mount }}"
+      - "{{ tendermint_host_data_mount }}:{{ tendermint_docker_data_mount }}"
+      - "{{ tendermint_host_wasm_mount }}:{{ tendermint_docker_wasm_mount }}"
+      - "{{ tendermint_host_keys_mount }}:{{ tendermint_docker_keys_mount }}"
+    env:
+      ENV: "testnet-3"
+      STRATEGY_EXECUTOR_ADDRESS: "{{ WALLET_ADDRESS }}"
+      STRATEGY_EXECUTOR_PRIVATE_KEY: "{{ WALLET_PRIVATE_KEY }}"
+      EVENT_BUS_BROKERS: "broker.testnet-3.elixirdev.xyz:9092"
+      DISPUTE_MANAGER_CONTRACT_ADDRESS: "0x7c7Cb2D279f0a25bF7e66fD6fc4C1fDdFb8DB10f"
+      STRATEGY_NAME: "NAIVE"

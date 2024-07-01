@@ -1,0 +1,23 @@
+---
+- name: Start container watchdog
+  become_user: "root"
+  become: true
+  community.docker.docker_container:
+    name: "{{ container_watchdog_container_name }}"
+    image: "{{ container_watchdog_docker_image }}"
+    state: started
+    pull: true
+    restart_policy: unless-stopped
+    networks:
+      - name: "elixir-validator-net"
+    networks_cli_compatible: true
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    env:
+      STORAGE_THRESHOLD: "{{ watchdog_storage_warning | float }}"
+      PROTOCOL_MEMORY_THRESHOLD: "{{ watchdog_protocol_mem_limit | float }}"
+      CONTAINER_NAME: "{{ tendermint_docker_container_name }}"
+      FREQUENCY: "{{ watchdog_frequency | int }}"
+      BOT_TOKEN: "{{ telegram_bot_token }}"
+      CHAT_ID: "{{ telegram_chat_id }}"

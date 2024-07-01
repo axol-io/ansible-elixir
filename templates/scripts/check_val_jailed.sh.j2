@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+#
+#
+# Ansible managed
+#
+
+cmd=$(docker exec -i elixir elixird query staking validator elixvaloper1u9q4h6sk7l3tkzh9skxx2ej95h6whzxy0w54gl | grep 'jailed: false' &> /dev/null )
+
+if [[ $? -eq 0 ]]; then
+   echo "elixir validator not jailed!"
+   echo $(date -u) "validator not jailed" >> /root/val_jailed_log.txt
+else
+   echo "elixir validator may be jailed!"
+   echo $(date -u) "Elixir testnet validator is jailed!" >> /root/val_jailed_log.txt
+   curl -X POST -H 'Content-type: application/json' --data '{"text":"elixir validator may be jailed! (Query returned non-zero rc)\naddress: elixvaloper1u9q4h6sk7l3tkzh9skxx2ej95h6whzxy0w54gl" }' https://api.telegram.org/bot{ API KEY }/sendMessage?chat_id=-1002101924871&text=elixir_validator_may_be_jailed!&reply_to_message_id=1026
+fi
