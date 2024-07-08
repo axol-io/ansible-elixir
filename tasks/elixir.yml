@@ -7,10 +7,10 @@
     group: "root"
     mode: "0755"
   with_items:
-    - "{{ tendermint_host_config_mount }}"
-    - "{{ tendermint_host_data_mount }}"
-    - "{{ tendermint_host_wasm_mount }}"
-    - "{{ tendermint_host_keys_mount }}"
+    - "{{ host_config_mount }}"
+    - "{{ host_data_mount }}"
+    - "{{ host_wasm_mount }}"
+    - "{{ host_keys_mount }}"
 
   # Option 1 - Local genesis JSON file (if genesis_file var is passed)
 - name: Task Copy elixir genesis file
@@ -18,7 +18,7 @@
   become: true
   copy:
     src: "{{ genesis_file }}"
-    dest: "{{ tendermint_host_config_mount }}/genesis.json"
+    dest: "{{ host_config_mount }}/genesis.json"
     owner: "root"
     group: "root"
     mode: "0644"
@@ -29,7 +29,7 @@
 - name: Task Download elixir genesis file
   get_url:
     url: "{{ genesis_url }}"
-    dest: "{{ tendermint_host_config_mount }}/genesis.json"
+    dest: "{{ host_config_mount }}/genesis.json"
     owner: "root"
     group: "root"
     checksum: "{{ genesis_checksum }}"
@@ -50,7 +50,7 @@
   become: true
   template:
     src: tendermint/{{ item }}.j2
-    dest: "{{ tendermint_host_config_mount }}/{{ item }}"
+    dest: "{{ host_config_mount }}/{{ item }}"
     owner: "root"
     group: "root"
     mode: "0644"
@@ -103,10 +103,10 @@
       SERVICE_HOST: "localhost"
     detach: true
     volumes:
-      - "{{ tendermint_host_config_mount }}:{{ tendermint_docker_config_mount }}"
-      - "{{ tendermint_host_data_mount }}:{{ tendermint_docker_data_mount }}"
-      - "{{ tendermint_host_wasm_mount }}:{{ tendermint_docker_wasm_mount }}"
-      - "{{ tendermint_host_keys_mount }}:{{ tendermint_docker_keys_mount }}"
+      - "{{ host_config_mount }}:{{ docker_config_mount }}"
+      - "{{ host_data_mount }}:{{ docker_data_mount }}"
+      - "{{ host_wasm_mount }}:{{ docker_wasm_mount }}"
+      - "{{ host_keys_mount }}:{{ docker_keys_mount }}"
     env:
       ENV: "testnet-3"
       STRATEGY_EXECUTOR_ADDRESS: "{{ WALLET_ADDRESS }}"
