@@ -1,0 +1,35 @@
+---
+- name: Create directory structure for cadvisor
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  with_items:
+    - "{{ host_config_mount }}/cadvisor"
+
+- name: Install cadvisor
+  become_user: root
+  become: true
+  community.docker.docker_container:
+    name: cadvisor
+    state: "{{ 'started' if cadvisor_enabled else 'absent' }}"
+    image: "{{ cadvisor_image }}"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - "{{ host_config_mount }}/cadvisor/var/lib/docker/:/var/lib/docker:ro"
+      - /dev/disk/:/dev/disk:ro
+    ports:
+      - 127.0.0.1:{{ cadvisor_port }}:{{ cadvisor_internal_port }}
+    privileged: true
+    devices:
+      - /dev/kmsg
+    command:
+      - --port={{ cadvisor_internal_port }}
+      - --enable_metrics=process,memory,network,oom_event,disk
+      - --docker_only=true
+      - --v=2
+      - --store_container_labels=false

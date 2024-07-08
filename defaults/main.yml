@@ -14,19 +14,21 @@ container_watchdog_container_name: "watchdog-container"
 
 network: "testnet"
 
+role: "elixir"
+
 # Custom flag for tendermint command
 custom_tendermint_flag: ""
 
 # host / docker mounts (override if neccessary)
-tendermint_host_config_mount: /root/.elixird/config
-tendermint_host_data_mount: /data/elixir
-tendermint_host_wasm_mount: /data/elixir/wasm
-tendermint_host_keys_mount: /root/.elixird/keys
+host_config_mount: /root/.elixird/config
+host_data_mount: /data/elixir
+host_wasm_mount: /data/elixir/wasm
+host_keys_mount: /root/.elixird/keys
 
-tendermint_docker_config_mount: /root/.elixird/config/
-tendermint_docker_data_mount: /root/.elixird/data/
-tendermint_docker_wasm_mount: /root/.elixird/wasm/
-tendermint_docker_keys_mount: /root/.elixird/keys
+docker_config_mount: /root/.elixird/config/
+docker_data_mount: /root/.elixird/data/
+docker_wasm_mount: /root/.elixird/wasm/
+docker_keys_mount: /root/.elixird/keys
 
 # Tendermint vars
 genesis_file: "{{ networks.testnet.genesis_file | default('') }}"
@@ -123,7 +125,7 @@ tendermint_rpc_port: 26657
 tendermint_rest_port: 1317
 tendermint_grpc_port: 9090
 tendermint_grpc_web_port: 9091
-tendermint_prometheus_port: 26660
+elixir_prometheus_port: 17690
 
 # Tenderduty Ports
 tenderduty_prometheus_port: 28686
@@ -145,26 +147,21 @@ tendermint_docker_memory_limit: "{{ (ansible_memory_mb.real.total * 0.8) | round
 
 validator_docker_ports:
   - "{{ tendermint_p2p_port }}:{{ tendermint_p2p_port }}"
-  - 127.0.0.1:{{ tendermint_prometheus_port }}:{{ tendermint_prometheus_port }}
+  - 127.0.0.1:{{ elixir_prometheus_port }}:{{ elixir_prometheus_port }}
 
-# Tenderduty Docker ports
-tenderduty_docker_ports:
-  - "{{ tenderduty_prometheus_port }}:{{ tenderduty_prometheus_port }}"
-  - "{{ tenderduty_dashboard_port }}:{{ tenderduty_dashboard_port }}"
+# Monitoring Vars
+prometheus_name: "prometheus"
 
-# elixir Specific Ports
-finality_provider_name: "finality-provider"
+grafana_agent_http_port: 12345
+grafana_agent_grpc_port: 9095
 
-eots_manager_name: "eots-manager"
+node_exporter_name: "node-exporter"
 
-eots_port: 12582
-
-finality_provider_rpc: 12581
-
-# Finality Provider ports
-finality_provider_ports:
-  - "{{ finality_provider_rpc | string }}:{{ finality_provider_rpc | string }}"
-
-# Eots manager Docker ports.
-eots_manager_ports:
-  - "{{ eots_port | string }}:{{ eots_port | string }}"
+# Cadvisor Vars
+cadvisor_enabled: true
+# renovate: datasource=docker depName=gcr.io/cadvisor/cadvisor versioning=docker
+cadvisor_image: gcr.io/cadvisor/cadvisor:v0.49.1
+# the default CADVISOR_HEALTHCHECK_URL is "http://localhost:8080/healthz"
+# so match it
+cadvisor_internal_port: 8080
+cadvisor_port: 24165

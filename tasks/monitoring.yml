@@ -1,37 +1,137 @@
 ---
-- name: Task copy config.yml
+- name: Ensure home directory for root exists with correct permissions
+  file:
+    path: /root
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Create directory structure for monitoring
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  with_items:
+    - "{{ host_config_mount }}/prometheus"
+    - "{{ host_config_mount }}/grafana"
+    - "{{ host_config_mount }}/grafana/agent"
+
+- name: Task copy grafana-agent.yml
   become_user: root
   become: true
   template:
-    src: config.yml
-    dest: "{{ tendermint_host_config_mount }}/config.yml"
+    src: grafana-agent.yml
+    dest: "{{ host_config_mount }}/grafana/grafana-agent.yml"
     force: true
     owner: "root"
     group: "root"
     mode: "0755"
   with_items:
-    - config.yml
+    - grafana-agent.yml
+  register: graf_cfg
 
-# Validator docker ports
-- name: Task Set tenderduty docker ports
-  set_fact:
-    docker_tenderduty_ports: "{{ tenderduty_docker_ports }}"
+- name: Task copy prometheus.yml
+  become_user: root
+  become: true
+  template:
+    src: prometheus.yml
+    dest: "{{ host_config_mount }}/prometheus/prometheus.yml"
+    force: true
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  with_items:
+    - prometheus.yml
+  register: prom_cfg
 
-- name: Task Run Tenderduty Validator Watcher Container
-  docker_container:
-    name: tenderduty
-    image: "{{ tenderduty_monitoring_image }}"
+- name: Monitoring config changed
+  ansible.builtin.set_fact:
+    cfg_changed: "{{ prom_cfg.changed | bool or graf_cfg.changed | bool }}"
+
+- name: Create necessary directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+  with_items:
+    - "{{ host_config_mount }}/monitoring"
+
+- name: Start node exporter
+  become_user: root
+  become: true
+  community.docker.docker_container:
+    name: "{{ node_exporter_name }}"
+    image: prom/node-exporter:latest
     state: started
+    pull: true
     restart_policy: unless-stopped
-    auto_remove: false  # Ensure the container is not removed after it stops
+    restart: "{{ cfg_changed }}"
     networks:
       - name: "elixir-validator-net"
-    ulimits:
-      - nofile:65535:65535
     networks_cli_compatible: true
-    command: ""
-    detach: true
-    ports: "{{ docker_tenderduty_ports }}"
+    privileged: true
+    ports:
+      - "9100:9100"
+
+- name: Start grafana agent
+  become_user: root
+  become: true
+  community.docker.docker_container:
+    name: grafana_agent
+    image: grafana/agent:v0.41.1
+    state: started
+    pull: true
+    restart_policy: unless-stopped
+    restart: "{{ cfg_changed }}"
+    networks:
+      - name: "elixir-validator-net"
+    networks_cli_compatible: true
+    privileged: true
+    ports:
+      - "12345:12345"  # Replace with the actual port you want to expose, if necessary
     volumes:
-      - "{{ tendermint_host_config_mount }}/tenderduty:/var/lib/tenderduty"
-      - "{{ tendermint_host_config_mount }}/config.yml:/var/lib/tenderduty/config.yml"
+      - "{{ host_config_mount }}/grafana:/etc/agent"
+    command:
+      - --config.file=/etc/agent/grafana-agent.yml
+
+- name: Start prometheus container
+  become_user: root
+  become: true
+  community.docker.docker_container:
+    name: "{{prometheus_name}}"
+    image: prom/prometheus:latest
+    state: started
+    pull: true
+    restart_policy: unless-stopped
+    restart: "{{ cfg_changed }}"
+    networks:
+      - name: "elixir-validator-net"
+    networks_cli_compatible: true
+    privileged: true
+    ports:
+      - "9090:9090"
+    volumes:
+      - "{{ host_config_mount }}/prometheus:/etc/prometheus"
+
+- name: Start grafana dashboard container
+  become_user: root
+  become: true
+  community.docker.docker_container:
+    name: grafana
+    image: grafana/grafana:latest
+    state: started
+    pull: true
+    restart_policy: unless-stopped
+    restart: "{{ cfg_changed }}"
+    networks:
+      - name: "elixir-validator-net"
+    networks_cli_compatible: true
+    privileged: true
+    ports:
+      - "3000:3000"
+    env:
+      GF_SECURITY_ADMIN_PASSWORD: "{{ GRAFANA_ADMIN_PASSWORD }}"
