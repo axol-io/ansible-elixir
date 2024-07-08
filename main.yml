@@ -56,9 +56,26 @@
       tags: elixir
 
     # - name: Include task monitoring
-    #   include_tasks: tasks/monitoring.yml
+    #   include_tasks: tasks/monitoring-tendermint.yml
     #   tags: monitoring  
 
     - name: Install watchdog
       ansible.builtin.import_tasks: tasks/watchdog.yml
       tags: watchdog
+
+        # Test cadvisor
+    # curl http://0.0.0.0:8080/healthz
+    # Expected response: ok~
+    - name: Install Cadvisor
+      ansible.builtin.import_tasks: tasks/cadvisor.yml
+      tags: cadvisor, always
+
+    - name: Include task monitoring
+      ansible.builtin.import_tasks: tasks/monitoring.yml
+      tags: monitoring
+
+  handlers:
+      - name: reload cadvisor
+        systemd:
+          name: cadvisor.service
+          state: restarted
