@@ -109,10 +109,6 @@
       - "{{ host_keys_mount }}:{{ docker_keys_mount }}"
     env:
       ENV: "testnet-3"
-      STRATEGY_EXECUTOR_ADDRESS: "{{ WALLET_ADDRESS }}"
       STRATEGY_EXECUTOR_PRIVATE_KEY: "{{ WALLET_PRIVATE_KEY }}"
-      EVENT_BUS_BROKERS: "broker.testnet-3.elixirdev.xyz:9092"
-      DISPUTE_MANAGER_CONTRACT_ADDRESS: "0x7c7Cb2D279f0a25bF7e66fD6fc4C1fDdFb8DB10f"
-      STRATEGY_NAME: "NAIVE"
       STRATEGY_EXECUTOR_IP_ADDRESS: "31.187.64.31"
       STRATEGY_EXECUTOR_DISPLAY_NAME: "Axol"
