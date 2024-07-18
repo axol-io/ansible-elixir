@@ -5,7 +5,7 @@
 tendermint_docker_container_name: "elixir"
 tendermint_binary_name: "elixird"
 
-tendermint_image: "elixirprotocol/validator:3.0.1"
+tendermint_image: "elixirprotocol/validator:3.0.2"
 tenderduty_monitoring_image: "ghcr.io/blockpane/tenderduty:latest"
 
 # Watchdog vars
@@ -146,8 +146,7 @@ tendermint_eth_ws_port: 8546
 tendermint_docker_memory_limit: "{{ (ansible_memory_mb.real.total * 0.8) | round | int }}M"
 
 validator_docker_ports:
-  - "{{ tendermint_p2p_port }}:{{ tendermint_p2p_port }}"
-  - 127.0.0.1:{{ elixir_prometheus_port }}:{{ elixir_prometheus_port }}
+  - "{{ elixir_prometheus_port }}:{{ elixir_prometheus_port }}"
 
 # Monitoring Vars
 prometheus_name: "prometheus"
