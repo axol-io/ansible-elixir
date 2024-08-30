@@ -109,7 +109,7 @@
       - "{{ host_keys_mount }}:{{ docker_keys_mount }}"
     env:
       ENV: "testnet-3"
-      STRATEGY_EXECUTOR_PRIVATE_KEY: "{{ WALLET_PRIVATE_KEY }}"
+      SIGNER_PRIVATE_KEY: "{{ WALLET_PRIVATE_KEY }}"
       STRATEGY_EXECUTOR_IP_ADDRESS: "{{ IP }}"
       STRATEGY_EXECUTOR_DISPLAY_NAME: "Axol"
       STRATEGY_EXECUTOR_BENEFICIARY: "{{ WALLET_ADDRESS }}"
