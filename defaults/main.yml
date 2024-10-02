@@ -5,7 +5,7 @@
 tendermint_docker_container_name: "elixir"
 tendermint_binary_name: "elixird"
 
-tendermint_image: "elixirprotocol/validator:3.4.8"
+tendermint_image: "elixirprotocol/validator:3.4.9"
 tenderduty_monitoring_image: "ghcr.io/blockpane/tenderduty:latest"
 
 # Watchdog vars
