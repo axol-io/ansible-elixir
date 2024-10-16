@@ -1,12 +1,11 @@
 ---
 # Docker Images
 
-# ansible-tendermint vars
-tendermint_docker_container_name: "elixir"
-tendermint_binary_name: "elixird"
+# ansible-elixir vars
+elixir_docker_container_name: "elixir"
+elixir_binary_name: "elixird"
 
 tendermint_image: "elixirprotocol/validator:3.5.1"
-tenderduty_monitoring_image: "ghcr.io/blockpane/tenderduty:latest"
 
 # Watchdog vars
 container_watchdog_docker_image: "jer117/watchdog-container:v0.0.3-elixir"
@@ -15,9 +14,6 @@ container_watchdog_container_name: "watchdog-container"
 network: "testnet"
 
 role: "elixir"
-
-# Custom flag for tendermint command
-custom_tendermint_flag: ""
 
 # host / docker mounts (override if neccessary)
 host_config_mount: /root/.elixird/config
@@ -30,120 +26,11 @@ docker_data_mount: /root/.elixird/data/
 docker_wasm_mount: /root/.elixird/wasm/
 docker_keys_mount: /root/.elixird/keys
 
-# Tendermint vars
-genesis_file: "{{ networks.testnet.genesis_file | default('') }}"
-genesis_url: "{{ networks.testnet.genesis_url | default('') }}"
-genesis_is_archive_file: "{{ networks.testnet.genesis_is_archive_file | default(false) }}"
-genesis_checksum: "{{ networks.testnet.genesis_checksum | default('') }}"
-chain_id: "{{ networks.testnet.chain_id }}"
-account_key_prefix: "{{ networks.testnet.account_key_prefix }}"
-consensus_key_prefix: "{{ networks.testnet.consensus_key_prefix }}"
-
-public_rpc_servers: "{{ networks.testnet.public_rpc_servers | default('') }}"
-skip_assert_invariants: "true"
-
-# Tendermint client config
-tendermint_client_keyring_backend: os
-tendermint_client_broadcast_mode: sync
-tendermint_client_cli_output: text
-
-# Tendermint app config
-app_halt_height: 0
-app_jsonrpc_evm_gas_cap: 25000000
-app_jsonrpc_evm_timeout: 5s
-app_jsonrpc_evm_txfee_cap: 1
-app_jsonrpc_evm_filter_cap: 200
-app_jsonrpc_evm_fee_history_cap: 100
-app_api_jsonrpc_namespaces: eth,net,web3
-app_api_jsonrpc_namespaces_debug: eth,net,web3,debug
-
-# Tendermint config - base
-tendermint_minimum_gas_prices: "{{ networks.testnet.minimum_gas_prices }}"
-tendermint_max_tx_gas_wanted: "{{ networks.testnet.max_tx_gas_wanted | default('') }}"
-# Tendermint config - main
-tendermint_log_level: info
-tendermint_log_format: json
-tendermint_db_backend: goleveldb
-# Tendermint config - p2p
-tendermint_seed_nodes: "{{ networks.testnet.seed_nodes_list | default('') }}"
-tendermint_persistent_peers: "{{ networks.testnet.persistent_peers | default('') }}"
-tendermint_private_peer_ids: "{{ networks.testnet.private_peer_ids | default('') }}"
-tendermint_unconditional_peer_ids: "{{ networks.testnet.unconditional_peer_ids | default('') }}"
-tendermint_max_num_inbound_peers: 320
-tendermint_max_num_outbound_peers: 40
-tendermint_handshake_timeout: 10s
-tendermint_dial_timeout: 3s
-tendermint_persistent_peers_max_dial_period: 1s
-# Tendermint app config - grpc
-tendermint_grpc_web_enable: true
-tendermint_grpc_max_recv_msg_size: 10485760
-tendermint_grpc_max_send_msg_size: 2147483647
-# Tendermint config - rpc
-tendermint_cors_allowed_headers:
-  - Origin
-  - Accept
-  - Content-Type
-  - X-Requested-With
-  - X-Server-Time
-
-tendermint_cors_allowed_methods: [HEAD, GET, POST]
-tendermint_cors_allowed_origins: []
-tendermint_grpc_max_open_connections: 900
-tendermint_max_open_connections: 900
-tendermint_max_subscription_clients: 100
-tendermint_max_subscriptions_per_client: 5
-tendermint_timeout_broadcast_tx_commit: 10s
-tendermint_max_body_bytes: 1000000
-tendermint_max_header_bytes: 1048576
-# Tendermint config - mempool
-tendermint_mempool_size: 10000
-tendermint_mempool_max_txs_bytes: 1073741824
-tendermint_mempool_max_tx_bytes: 1048576
-tendermint_mempool_cache_size: 10000
-# Tendermint config - consensus
-tendermint_create_empty_blocks: true
-tendermint_create_empty_blocks_interval: "0s"
-tendermint_double_sign_check_height: 10
-tendermint_peer_gossip_sleep_duration: 100ms
-tendermint_peer_query_maj23_sleep_duration: 2s
-tendermint_skip_timeout_commit: false
-tendermint_timeout_commit: 5s
-tendermint_timeout_commit_delta: 500ms
-tendermint_timeout_precommit: 1s
-tendermint_timeout_precommit_delta: 500ms
-tendermint_timeout_prevote: 1s
-tendermint_timeout_prevote_delta: 500ms
-tendermint_timeout_propose: 3s
-tendermint_timeout_propose_delta: 500ms
-
-# Node inventory config
-validator_address: "zetavaloper1vk6t4nr8nfnd0etzer4sp29glg22rvmqf5hwm4"
-
-# Tendermint Ports
-tendermint_p2p_port: 26656
-tendermint_rpc_port: 26657
-tendermint_rest_port: 1317
-tendermint_grpc_port: 9090
-tendermint_grpc_web_port: 9091
+# Elixir Ports
 elixir_prometheus_port: 17690
 
-# Tenderduty Ports
-tenderduty_prometheus_port: 28686
-tenderduty_dashboard_port: 8888
-
-# PEX
-pex_enabled: "true"
-
-# Telemetry
-telemetry_enabled: "false"
-
-# these ports are currently only being used by evmos but am defining here in case other evm chains
-# follow similar convention (if not we can move these out of here and pass them down from evmos role)
-tendermint_eth_rpc_port: 8545
-tendermint_eth_ws_port: 8546
-
 # set docker container memory limit to 80% of available machine memory
-tendermint_docker_memory_limit: "{{ (ansible_memory_mb.real.total * 0.8) | round | int }}M"
+elixir_docker_memory_limit: "{{ (ansible_memory_mb.real.total * 0.8) | round | int }}M"
 
 validator_docker_ports:
   - "{{ elixir_prometheus_port }}:{{ elixir_prometheus_port }}"

@@ -17,7 +17,7 @@
     env:
       STORAGE_THRESHOLD: "{{ watchdog_storage_warning | float }}"
       PROTOCOL_MEMORY_THRESHOLD: "{{ watchdog_protocol_mem_limit | float }}"
-      CONTAINER_NAME: "{{ tendermint_docker_container_name }}"
+      CONTAINER_NAME: "{{ elixir_docker_container_name }}"
       FREQUENCY: "{{ watchdog_frequency | int }}"
       BOT_TOKEN: "{{ telegram_bot_token }}"
       CHAT_ID: "{{ telegram_chat_id }}"
