@@ -1,22 +1,5 @@
-# Host mounts
-tendermint_host_config_mount: "/root/.elixird/config"
-tendermint_host_data_mount: "/data/elixir"
-tendermint_host_wasm_mount: "/root/.elixird/wasm"
-tendermint_host_keys_mount: "/root/.elixird/keyring-test"
-
-tendermint_timeout_commit: "5s"
-tendermint_max_num_inbound_peers: 100
-tendermint_max_num_outbound_peers: 100
-tendermint_recv_rate: 22020096
-tendermint_send_rate: 22020096
-tendermint_flush_throttle_timeout: "10ms"
-
+# Watchdog vars
 watchdog_storage_warning: 85
 watchdog_protocol_mem_limit: 90
 watchdog_frequency: 10
-
-tendermint_config_files:
-  - config.toml
-  - app.toml
-  - client.toml
 

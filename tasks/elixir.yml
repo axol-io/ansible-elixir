@@ -12,39 +12,6 @@
     - "{{ host_wasm_mount }}"
     - "{{ host_keys_mount }}"
 
-  # Option 1 - Local genesis JSON file (if genesis_file var is passed)
-- name: Task Copy elixir genesis file
-  become_user: root
-  become: true
-  copy:
-    src: "{{ genesis_file }}"
-    dest: "{{ host_config_mount }}/genesis.json"
-    owner: "root"
-    group: "root"
-    mode: "0644"
-  register: genesis_file_cfg
-  when: genesis_file is defined and genesis_file != ""
-
-# Option 2 - Remote genesis JSON file
-- name: Task Download elixir genesis file
-  get_url:
-    url: "{{ genesis_url }}"
-    dest: "{{ host_config_mount }}/genesis.json"
-    owner: "root"
-    group: "root"
-    checksum: "{{ genesis_checksum }}"
-    mode: "0655"
-  register: genesis_cfg
-  tags: [genesis]
-  when: genesis_url is defined and genesis_url != "" and not genesis_is_archive_file
-
-# - name: Task Pull elixir Docker Image
-#   docker_image:
-#     name: jer117/elixir:v11.0.4-1
-#     state: present
-#     force_source: no
-#     ignore_errors: true
-
 - name: Task Copy helper scripts
   become_user: root
   become: true
@@ -87,11 +54,11 @@
 
 - name: Task Create elixir Docker Container
   docker_container:
-    name: "{{ tendermint_docker_container_name }}"
+    name: "{{ elixir_docker_container_name }}"
     image: "{{ tendermint_image }}"
     state: started
-    memory: "{{ tendermint_docker_memory_limit }}"
-    memory_swap: "{{ tendermint_docker_memory_limit }}"
+    memory: "{{ elixir_docker_memory_limit }}"
+    memory_swap: "{{ elixir_docker_memory_limit }}"
     restart_policy: unless-stopped
     networks:
       - name: "elixir-validator-net"
