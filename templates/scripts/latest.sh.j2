@@ -1,2 +1,0 @@
-#!/usr/bin/env /bin/bash
-curl -sS "http://localhost:{{ tendermint_rpc_port }}/status" | jq .result.sync_info.latest_block_height

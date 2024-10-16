@@ -1,2 +1,0 @@
-#!/usr/bin/env /bin/bash
-docker exec -it {{ tendermint_docker_container_name }} {{ tendermint_binary_name}} keys list --keyring-dir {{ docker_keys_mount }} --keyring-backend {{ tendermint_client_keyring_backend }}
