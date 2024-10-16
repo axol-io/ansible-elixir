@@ -45,22 +45,6 @@
 #     force_source: no
 #     ignore_errors: true
 
-- name: Task Render elixir config
-  become_user: root
-  become: true
-  template:
-    src: tendermint/{{ item }}.j2
-    dest: "{{ host_config_mount }}/{{ item }}"
-    owner: "root"
-    group: "root"
-    mode: "0644"
-  loop: "{{ tendermint_config_files }}"
-  register: cfg
-
-- name: Task Detect if config has changed
-  set_fact:
-    cfg_changed: "{{ cfg.changed | bool or genesis_cfg.changed | bool }}"
-
 - name: Task Copy helper scripts
   become_user: root
   become: true
@@ -72,11 +56,29 @@
     group: "root"
     mode: "0755"
   with_items:
-    - peers
-    - latest
-    - recover-account
-    - list-accounts
     - elixird
+
+- name: Elixir status scripts
+  become_user: root
+  become: true
+  template:
+    src: scripts/health_check.sh.j2
+    dest: /usr/local/bin/health_check.sh
+    force: true
+    owner: root
+    group: root
+    mode: "0755"
+  vars:
+    secrets_file: "/etc/ansible/host_vars/{{ inventory_hostname }}.yml"
+
+- name: Create cron entry for elixr server and api status
+  cron:
+    user: "root"
+    name: check server status
+    minute: "*"
+    hour: "*"
+    job: /usr/local/bin/health_check.sh
+    state: present
 
 # Validator docker ports
 - name: Task Set validator docker ports
@@ -91,7 +93,6 @@
     memory: "{{ tendermint_docker_memory_limit }}"
     memory_swap: "{{ tendermint_docker_memory_limit }}"
     restart_policy: unless-stopped
-    restart: "{{ cfg_changed | bool }}"
     networks:
       - name: "elixir-validator-net"
     ulimits:
