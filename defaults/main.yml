@@ -5,7 +5,7 @@
 elixir_docker_container_name: "elixir"
 elixir_binary_name: "elixird"
 
-tendermint_image: "elixirprotocol/validator:3.5.1"
+tendermint_image: "elixirprotocol/validator:3.5.2"
 
 # Watchdog vars
 container_watchdog_docker_image: "jer117/watchdog-container:v0.0.3-elixir"
