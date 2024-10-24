@@ -5,9 +5,7 @@
 # Extract variables directly from Ansible environment
 telegram_bot_token="{{ telegram_bot_token }}"
 telegram_chat_id="{{ telegram_chat_id }}"
-
-# Convert Ansible list into a bash array
-server_names=({{ groups['servers'] | map('quote') | join(' ') }})
+server_ip="{{ ansible_default_ipv4.address }}"  # Use the current server's IP
 
 # Define log file paths
 log_directory="/root"
@@ -28,23 +26,18 @@ send_alert() {
     -d "text=${message}" > /dev/null
 }
 
-# Additional health checks
+# Check localhost:17690/health on the specific server
+response=$(curl -s http://localhost:17690/health | jq -r .status)
+current_time=$(date "+%Y-%m-%d %H:%M:%S")
 
-# Additional health checks for each server in server_names
-for server_ip in "${server_names[@]}"; do
-
-# Check localhost:17690/health
-  response=$(curl -s http://localhost:17690/health | jq -r .status)
-  current_time=$(date "+%Y-%m-%d %H:%M:%S")
-
-  if [ "$response" != "OK" ]; then
-    message="ALERT: Health check failed for ${server_ip}. Status: ${response}"
-    echo "[${current_time}] ALERT: Health check failed for ${server_ip}. Status: ${response}" >> "${error_log}"
-    send_alert "${message}"
-  else
-    echo "[${current_time}] SUCCESS: Health check passed for ${server_ip}. Status: ${response}" >> "${success_log}"
-  fi
-done
+if [ "$response" != "OK" ]; then
+  # Only show the IP of the server that failed
+  message="ALERT: Health check failed for ${server_ip}. Status: ${response}"
+  echo "[${current_time}] ALERT: Health check failed for ${server_ip}. Status: ${response}" >> "${error_log}"
+  send_alert "${message}"
+else
+  echo "[${current_time}] SUCCESS: Health check passed for ${server_ip}. Status: ${response}" >> "${success_log}"
+fi
 
 # Check external API health: https://api.testnet-3.elixir.xyz/health/
 response=$(curl -s https://api.testnet-3.elixir.xyz/health/ | jq -r .status)

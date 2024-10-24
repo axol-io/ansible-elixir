@@ -3,7 +3,8 @@
 
   tasks:
     - name: Load secret variables
-      ansible.builtin.include_vars: secrets.yml
+      ansible.builtin.include_vars:
+        file: "host_vars/{{ inventory_hostname }}.yml"
       tags: [always]
 
     - name: Include network specific vars
@@ -26,15 +27,8 @@
         url: https://download.docker.com/linux/ubuntu/gpg
         state: present
 
-    - name: Add Docker repository
-      apt_repository:
-        repo: "deb [arch=arm64] https://download.docker.com/linux/ubuntu jammy stable"
-        state: present
-        update_cache: yes
-        filename: docker
-
-    - name: Install Docker
-      apt:
+    - name: Install Docker using Snap
+      snap:
         name: docker
         state: present
 
