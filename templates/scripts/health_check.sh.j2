@@ -39,12 +39,12 @@ else
   echo "[${current_time}] SUCCESS: Health check passed for ${server_ip}. Status: ${response}" >> "${success_log}"
 fi
 
-# Check external API health: https://api.testnet-3.elixir.xyz/health/
-response=$(curl -s https://api.testnet-3.elixir.xyz/health/ | jq -r .status)
+# Check external API health: {{ networks[network].api_url }}
+response=$(curl -s {{ networks[network].api_url }} | jq -r .status)
 current_time=$(date "+%Y-%m-%d %H:%M:%S")
 
 if [ "$response" != "up" ]; then
-  message="ALERT: Elixir API health check failed. Status: ${response}"
+  message="ALERT: Elixir API health check failed for {{ network }}"
   echo "[${current_time}] ALERT: Elixir API health check failed. Status: ${response}" >> "${error_log}"
   send_alert "${message}"
 else
