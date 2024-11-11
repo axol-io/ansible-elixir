@@ -7,30 +7,23 @@ scrape_configs:
     static_configs:
       - targets: ['{{ prometheus_name }}:9090']
 
-  - job_name: 'node_exporter'
+  - job_name: 'node-exporter'
     static_configs:
-      - targets: ['node_exporter:9100']
+      - targets: ['node-exporter:9100']
 
   - job_name: "{{ role }}-op-node-exporter"
     static_configs:
-      - targets: ["{{ elixir_prometheus_port }}:{{ elixir_prometheus_port }}"]
+      - targets: ["{{ elixir_docker_container_name }}:{{ elixir_prometheus_port }}"]
 
   - job_name: "{{ role }}-exporter"
-    metrics_path: /metrics
+    metrics_path: /metrics/prometheus
     static_configs:
-      - targets: ["127.0.0.1:{{ elixir_prometheus_port }}"]
-
-  - job_name: 'elixir'
-    scheme: https # Assuming metrics are served over HTTPS; change to 'http' if not
-    tls_config:
-      insecure_skip_verify: true  # Use this for self-signed certificates; remove or adjust in production
-    static_configs:
-      - targets: ['{{ role }}:{{ elixir_prometheus_port }}']
+      - targets: ["{{ elixir_docker_container_name }}:{{ elixir_prometheus_port }}"]
 
   - job_name: 'cadvisor'
     static_configs:
-      - targets: ['cadvisor:8080']
+      - targets: ['cadvisor:{{ cadvisor_internal_port }}']
 
   - job_name: 'grafana_agent'
     static_configs:
-      - targets: ['grafana_agent:12345']  # Adjust if necessary
+      - targets: ['grafana_agent:{{ grafana_agent_http_port }}']  # Adjust if necessary
