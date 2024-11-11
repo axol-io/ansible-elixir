@@ -22,9 +22,14 @@
       - /sys:/sys:ro
       - "{{ host_config_mount }}/cadvisor/var/lib/docker/:/var/lib/docker:ro"
       - /dev/disk/:/dev/disk:ro
-    ports:
-      - 127.0.0.1:{{ cadvisor_port }}:{{ cadvisor_internal_port }}
+    pull: true
+    restart_policy: unless-stopped
+    networks:
+      - name: "elixir-validator-net"
+    networks_cli_compatible: true
     privileged: true
+    ports:
+      - "{{ cadvisor_port }}:{{ cadvisor_internal_port }}"
     devices:
       - /dev/kmsg
     command:

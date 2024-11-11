@@ -19,6 +19,19 @@
     - "{{ host_config_mount }}/grafana"
     - "{{ host_config_mount }}/grafana/agent"
 
+- name: Task Copy helper scripts
+  become_user: root
+  become: true
+  template:
+    src: datasource.yml
+    dest: "{{ host_config_mount }}/grafana/datasource.yml"
+    force: true
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  with_items:
+    - datasource.yml
+
 - name: Task copy grafana-agent.yml
   become_user: root
   become: true
@@ -97,6 +110,7 @@
       - "{{ host_config_mount }}/grafana:/etc/agent"
     command:
       - --config.file=/etc/agent/grafana-agent.yml
+      - --server.http.address=0.0.0.0:12345
 
 - name: Start prometheus container
   become_user: root
@@ -135,3 +149,5 @@
       - "3000:3000"
     env:
       GF_SECURITY_ADMIN_PASSWORD: "{{ GRAFANA_ADMIN_PASSWORD }}"
+    volumes:
+      - "{{ host_config_mount }}/grafana/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml"
