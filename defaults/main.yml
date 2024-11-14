@@ -35,7 +35,7 @@ elixir_prometheus_port: 17690
 elixir_docker_memory_limit: "{{ (ansible_memory_mb.real.total * 0.8) | round | int }}M"
 
 validator_docker_ports:
-  - "{{ elixir_prometheus_port }}:{{ elixir_prometheus_port }}"
+  - 127.0.0.1:{{ elixir_prometheus_port }}:{{ elixir_prometheus_port }}
 
 # Monitoring Vars
 prometheus_name: "prometheus"

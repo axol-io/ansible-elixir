@@ -88,7 +88,7 @@
     networks_cli_compatible: true
     privileged: true
     ports:
-      - "9100:9100"
+      - "127.0.0.1:9100:9100"
 
 - name: Start grafana agent
   become_user: root
@@ -105,7 +105,7 @@
     networks_cli_compatible: true
     privileged: true
     ports:
-      - "12345:12345"  # Replace with the actual port you want to expose, if necessary
+      - "127.0.0.1:12345:12345"  # Replace with the actual port you want to expose, if necessary
     volumes:
       - "{{ host_config_mount }}/grafana:/etc/agent"
     command:
