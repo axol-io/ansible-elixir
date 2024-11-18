@@ -91,15 +91,18 @@ For other operating systems, refer to the [Ansible installation guide](https://d
 
 ## Secret Management
 
+Directory Structure
+![Architecture Diagram](Images/Directory_Structure.png)
+
 To manage your secrets, create a `secrets.yml` file and populate it with the necessary credentials. **This file should be kept secure and not committed to version control (i.e. add to your .gitignore).**
 
 We recommend backing up your secrets using 1Password for simple secret storage.
 
 ```sh
-touch secrets.yml
+mkdir host_vars && cd host_vars && touch IP.yml
 ```
 
-Copy below into secrets.yml.
+Copy below into IP.yml.
 Not all values are required.
 
 ```sh
