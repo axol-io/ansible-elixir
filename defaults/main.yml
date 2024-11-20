@@ -6,7 +6,7 @@ elixir_docker_container_name: "elixir"
 elixir_binary_name: "elixird"
 
 elixir_version:
-  elixir_image_testnet: "elixirprotocol/validator:3.5.6-testnet"
+  elixir_image_testnet: "elixirprotocol/validator:3.5.7-testnet"
   elixir_image_mainnet: "elixirprotocol/validator:3.5.6"
 
 tendermint_image: "{{ elixir_version['elixir_image_' + network] }}"
