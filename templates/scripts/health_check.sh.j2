@@ -40,7 +40,7 @@ else
 fi
 
 # Check external API health: {{ networks[network].api_url }}
-response=$(curl -s {{ networks[network].api_url }} | jq -r .status)
+response=$(curl -sSL {{ networks[network].api_url }} | jq -r .status)
 current_time=$(date "+%Y-%m-%d %H:%M:%S")
 
 if [ "$response" != "up" ]; then
