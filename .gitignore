@@ -1,2 +1,3 @@
 secrets.yml
 host_vars/*
+inventory
