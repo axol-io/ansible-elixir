@@ -27,11 +27,6 @@
         url: https://download.docker.com/linux/ubuntu/gpg
         state: present
 
-    - name: Install Docker using Snap
-      snap:
-        name: docker
-        state: present
-
     - name: Include main vars
       ansible.builtin.include_vars: main.yml
       tags: [always]
